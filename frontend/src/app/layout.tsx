@@ -1,6 +1,6 @@
 "use client";
 
-import "src/styles/globals.css";
+import "/Users/williameklund/AlphaForge/AlphaForge/frontend/src/styles/globals.css";
 import { ThemeProvider } from "next-themes";
 
 export default function RootLayout({
