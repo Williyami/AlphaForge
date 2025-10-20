@@ -1,7 +1,8 @@
 "use client";
 
+
 import { useState } from 'react';
-import { Search, DollarSign, Calendar, Zap, TrendingUp, BarChart3, Download } from 'lucide-react';
+import { Search, DollarSign, Calendar, Zap, TrendingUp, BarChart3, Download, Save, CheckCircle } from 'lucide-react';
 import { BearIcon, BaseIcon, BullIcon } from '@/components/Icons';
 import { RevenueGrowthChart, FCFWaterfallChart, ScenarioComparisonChart, ValuationBreakdownChart } from '@/components/Charts';
 import { exportDCFToExcel, exportScenariosToExcel } from '@/lib/exportToExcel';
@@ -13,6 +14,7 @@ export default function Analysis() {
   const [scenarios, setScenarios] = useState<any>(null);
   const [error, setError] = useState('');
   const [showScenarios, setShowScenarios] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const handleAnalysis = async (includeScenarios = false) => {
     if (!ticker.trim()) {
@@ -68,6 +70,51 @@ export default function Analysis() {
     }
   };
 
+  const handleSave = async () => {
+  setSaveStatus('saving');
+  
+  try {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    
+    const dataToSave = showScenarios ? {
+      ticker: scenarios.ticker,
+      company_name: scenarios.company_name,
+      current_price: scenarios.current_price,
+      fair_value: scenarios.scenarios.base.value_per_share,
+      upside_percent: scenarios.scenarios.base.upside,
+      enterprise_value: scenarios.base_case.enterprise_value,
+      equity_value: scenarios.base_case.equity_value,
+      dcf_results: scenarios
+    } : {
+      ticker: results.ticker,
+      company_name: results.company_name,
+      current_price: results.current_price,
+      fair_value: results.dcf_results.value_per_share,
+      upside_percent: results.upside,
+      enterprise_value: results.dcf_results.enterprise_value,
+      equity_value: results.dcf_results.equity_value,
+      dcf_results: results.dcf_results
+    };
+    
+    const response = await fetch(`${API_URL}/api/v1/saved/dcf/save`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dataToSave)
+    });
+    
+    if (response.ok) {
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } else {
+      throw new Error('Failed to save');
+    }
+  } catch (error) {
+    console.error('Error saving analysis:', error);
+    setSaveStatus('error');
+    setTimeout(() => setSaveStatus('idle'), 3000);
+  }
+};
+
   const displayData = showScenarios ? scenarios : results;
 
   return (
@@ -80,14 +127,49 @@ export default function Analysis() {
             <p className="text-gray-600 dark:text-gray-400">Generate DCF valuations and scenario analysis</p>
           </div>
           {displayData && (
-            <button
-              onClick={handleExport}
-              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl"
-            >
-              <Download className="h-5 w-5" />
-              Export to Excel
-            </button>
-          )}
+  <div className="flex gap-3">
+    <button
+      onClick={handleSave}
+      disabled={saveStatus === 'saving'}
+      className={`px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl ${
+        saveStatus === 'saved'
+          ? 'bg-green-600 text-white'
+          : saveStatus === 'error'
+          ? 'bg-red-600 text-white'
+          : 'bg-purple-600 hover:bg-purple-700 text-white'
+      }`}
+    >
+      {saveStatus === 'saving' ? (
+        <>
+          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+          Saving...
+        </>
+      ) : saveStatus === 'saved' ? (
+        <>
+          <CheckCircle className="h-5 w-5" />
+          Saved!
+        </>
+      ) : saveStatus === 'error' ? (
+        <>
+          <Save className="h-5 w-5" />
+          Failed
+        </>
+      ) : (
+        <>
+          <Save className="h-5 w-5" />
+          Save Analysis
+        </>
+      )}
+    </button>
+    <button
+      onClick={handleExport}
+      className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl"
+    >
+      <Download className="h-5 w-5" />
+      Export to Excel
+    </button>
+  </div>
+)}
         </header>
 
         {/* Search Bar */}
