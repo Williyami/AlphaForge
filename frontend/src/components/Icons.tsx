@@ -113,3 +113,54 @@ export function PEIcon({ className = "w-full h-40" }: { className?: string }) {
     </svg>
   );
 }
+
+export function BearIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="28" fill="url(#bear-gradient)" />
+      <path d="M20 35 L26 40 L32 32 L38 38 L44 30" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M38 30 L44 30 L44 36" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <defs>
+        <linearGradient id="bear-gradient" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#EF4444" />
+          <stop offset="1" stopColor="#DC2626" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function BaseIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="28" fill="url(#base-gradient)" />
+      <path d="M20 32 L28 28 L36 35 L44 30" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="20" cy="32" r="2" fill="white" />
+      <circle cx="28" cy="28" r="2" fill="white" />
+      <circle cx="36" cy="35" r="2" fill="white" />
+      <circle cx="44" cy="30" r="2" fill="white" />
+      <defs>
+        <linearGradient id="base-gradient" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#3B82F6" />
+          <stop offset="1" stopColor="#2563EB" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+export function BullIcon({ className = "w-6 h-6" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="28" fill="url(#bull-gradient)" />
+      <path d="M20 40 L26 35 L32 38 L38 28 L44 32" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M38 28 L44 32 L40 38" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <defs>
+        <linearGradient id="bull-gradient" x1="4" y1="4" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#10B981" />
+          <stop offset="1" stopColor="#059669" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
