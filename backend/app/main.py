@@ -4,6 +4,7 @@ from app.database import engine, Base
 
 # Import routes first (they don't need models)
 from app.api.v1.routes import analysis, market, lbo, saved_analyses, tiers
+from app.api.v1.middleware import auth
 
 app = FastAPI(
     title="AlphaForge API",
@@ -37,6 +38,8 @@ app.include_router(market.router, prefix="/api/v1/market", tags=["market"])
 app.include_router(lbo.router, prefix="/api/v1/lbo", tags=["lbo"])
 app.include_router(saved_analyses.router, prefix="/api/v1/saved", tags=["saved"])
 app.include_router(tiers.router, prefix="/api/v1", tags=["tiers"])
+app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])
 
 @app.get("/")
 async def root():

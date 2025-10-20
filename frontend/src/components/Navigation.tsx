@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Home, BarChart3, TrendingUp, FileText, Briefcase, DollarSign } from "lucide-react";
+import { Sun, Moon, Home, BarChart3, TrendingUp, FileText, Briefcase, DollarSign, LogOut, User as UserIconLucide } from "lucide-react";
 import { TextLogo } from "./Logo";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "./AuthModal";
 
 export function Navigation() {
   const pathname = usePathname();
