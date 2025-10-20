@@ -36,9 +36,13 @@ export default function Analysis() {
           body: JSON.stringify({ ticker: ticker.toUpperCase() })
         });
 
-        if (!response.ok) throw new Error('Failed to fetch scenarios');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to fetch scenarios');
+        }
         
         const data = await response.json();
+        console.log('Scenarios data:', data);
         setScenarios(data);
         setShowScenarios(true);
       } else {
@@ -48,13 +52,18 @@ export default function Analysis() {
           body: JSON.stringify({ ticker: ticker.toUpperCase() })
         });
 
-        if (!response.ok) throw new Error('Failed to fetch analysis');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.detail || 'Failed to fetch analysis');
+        }
         
         const data = await response.json();
+        console.log('Analysis data:', data);
         setResults(data);
         setShowScenarios(false);
       }
     } catch (err: any) {
+      console.error('Error:', err);
       setError(err.message || 'An error occurred');
     } finally {
       setLoading(false);
@@ -75,14 +84,14 @@ export default function Analysis() {
     try {
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
       
-      const dataToSave = showScenarios ? {
+      const dataToSave = showScenarios && scenarios ? {
         ticker: scenarios.ticker,
         company_name: scenarios.company_name,
         current_price: scenarios.current_price,
-        fair_value: scenarios.scenarios.base.value_per_share,
-        upside_percent: scenarios.scenarios.base.upside,
-        enterprise_value: scenarios.base_case.enterprise_value,
-        equity_value: scenarios.base_case.equity_value,
+        fair_value: scenarios.scenarios?.base?.value_per_share || 0,
+        upside_percent: scenarios.scenarios?.base?.upside || 0,
+        enterprise_value: scenarios.base_case?.enterprise_value || 0,
+        equity_value: scenarios.base_case?.equity_value || 0,
         dcf_results: scenarios
       } : {
         ticker: results.ticker,
@@ -119,7 +128,7 @@ export default function Analysis() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0D1117] text-gray-900 dark:text-white p-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header with Export Button */}
         <header className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Stock Analysis</h1>
@@ -189,7 +198,7 @@ export default function Analysis() {
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 rounded-lg font-semibold flex items-center gap-2 transition text-white"
             >
               <Search className="h-5 w-5" />
-              {loading ? 'Analyzing...' : 'Quick DCF'}
+              {loading ? 'Analyzing...' : 'Analyze'}
             </button>
             <button
               onClick={() => handleAnalysis(true)}
@@ -203,176 +212,296 @@ export default function Analysis() {
           {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
         </div>
 
-        {/* Results Section */}
-        {displayData && (
+        {/* Scenario Analysis Results */}
+        {showScenarios && scenarios && scenarios.scenarios && (
           <div className="space-y-6">
-            {/* Company Header */}
+            {/* Header */}
             <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-              <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
-                {displayData.company_name} ({displayData.ticker})
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Current Price: <span className="font-semibold text-gray-900 dark:text-white">
-                  ${displayData.current_price?.toFixed(2) || '0.00'}
-                </span>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{scenarios.company_name}</h2>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Current Price: <span className="font-semibold text-gray-900 dark:text-white">${scenarios.current_price?.toFixed(2) || 'N/A'}</span>
               </p>
-            </div>
 
-            {/* Scenario or Regular Results */}
-            {showScenarios && scenarios ? (
-              <>
-                {/* Scenario Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Bear */}
+              {/* Scenario Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Bear Case */}
+                {scenarios.scenarios.bear && (
                   <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-700 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <BearIcon className="w-8 h-8" />
                       <div>
-                        <h3 className="text-lg font-bold">Bear Case</h3>
-                        <span className="text-xs text-red-600">Pessimistic</span>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Bear Case</h3>
+                        <span className="text-xs text-red-600 dark:text-red-400">Pessimistic</span>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Fair Value</p>
-                      <p className="text-2xl font-bold">${scenarios.scenarios.bear.value_per_share.toFixed(2)}</p>
-                      <p className={`text-xl font-semibold mt-2 ${scenarios.scenarios.bear.upside > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {scenarios.scenarios.bear.upside > 0 ? '+' : ''}{scenarios.scenarios.bear.upside.toFixed(1)}%
-                      </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Fair Value</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          ${scenarios.scenarios.bear.value_per_share?.toFixed(2) || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Upside/Downside</p>
+                        <p className={`text-xl font-semibold ${scenarios.scenarios.bear.upside > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {scenarios.scenarios.bear.upside > 0 ? '+' : ''}{scenarios.scenarios.bear.upside}%
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-red-200 dark:border-red-800">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Assumptions:</p>
+                        <p className="text-xs text-gray-700 dark:text-gray-300">
+                          Growth: {(scenarios.scenarios.bear.assumptions.revenue_growth * 100).toFixed(1)}%<br/>
+                          Margin: {(scenarios.scenarios.bear.assumptions.ebitda_margin * 100).toFixed(1)}%<br/>
+                          WACC: {(scenarios.scenarios.bear.assumptions.wacc * 100).toFixed(1)}%
+                        </p>
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Base */}
+                {/* Base Case */}
+                {scenarios.scenarios.base && (
                   <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 dark:border-blue-600 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <BaseIcon className="w-8 h-8" />
                       <div>
-                        <h3 className="text-lg font-bold">Base Case</h3>
-                        <span className="text-xs text-blue-600">Most Likely</span>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Base Case</h3>
+                        <span className="text-xs text-blue-600 dark:text-blue-400">Most Likely</span>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Fair Value</p>
-                      <p className="text-2xl font-bold">${scenarios.scenarios.base.value_per_share.toFixed(2)}</p>
-                      <p className={`text-xl font-semibold mt-2 ${scenarios.scenarios.base.upside > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {scenarios.scenarios.base.upside > 0 ? '+' : ''}{scenarios.scenarios.base.upside.toFixed(1)}%
-                      </p>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Fair Value</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          ${scenarios.scenarios.base.value_per_share?.toFixed(2) || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Upside/Downside</p>
+                        <p className={`text-xl font-semibold ${scenarios.scenarios.base.upside > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {scenarios.scenarios.base.upside > 0 ? '+' : ''}{scenarios.scenarios.base.upside}%
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-blue-200 dark:border-blue-800">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Assumptions:</p>
+                        <p className="text-xs text-gray-700 dark:text-gray-300">
+                          Growth: {(scenarios.scenarios.base.assumptions.revenue_growth * 100).toFixed(1)}%<br/>
+                          Margin: {(scenarios.scenarios.base.assumptions.ebitda_margin * 100).toFixed(1)}%<br/>
+                          WACC: {(scenarios.scenarios.base.assumptions.wacc * 100).toFixed(1)}%
+                        </p>
+                      </div>
                     </div>
                   </div>
+                )}
 
-                  {/* Bull */}
-                  <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 rounded-lg p-6">
+                {/* Bull Case */}
+                {scenarios.scenarios.bull && (
+                  <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-400 dark:border-green-600 rounded-lg p-6">
                     <div className="flex items-center gap-3 mb-4">
                       <BullIcon className="w-8 h-8" />
                       <div>
-                        <h3 className="text-lg font-bold">Bull Case</h3>
-                        <span className="text-xs text-green-600">Optimistic</span>
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white">Bull Case</h3>
+                        <span className="text-xs text-green-600 dark:text-green-400">Optimistic</span>
                       </div>
                     </div>
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Fair Value</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          ${scenarios.scenarios.bull.value_per_share?.toFixed(2) || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Upside/Downside</p>
+                        <p className={`text-xl font-semibold ${scenarios.scenarios.bull.upside > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                          {scenarios.scenarios.bull.upside > 0 ? '+' : ''}{scenarios.scenarios.bull.upside}%
+                        </p>
+                      </div>
+                      <div className="pt-3 border-t border-green-200 dark:border-green-800">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">Assumptions:</p>
+                        <p className="text-xs text-gray-700 dark:text-gray-300">
+                          Growth: {(scenarios.scenarios.bull.assumptions.revenue_growth * 100).toFixed(1)}%<br/>
+                          Margin: {(scenarios.scenarios.bull.assumptions.ebitda_margin * 100).toFixed(1)}%<br/>
+                          WACC: {(scenarios.scenarios.bull.assumptions.wacc * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Scenario Comparison Chart */}
+            <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                <BarChart3 className="h-5 w-5 text-blue-500" />
+                Scenario Comparison
+              </h3>
+              <ScenarioComparisonChart scenarios={scenarios.scenarios} currentPrice={scenarios.current_price} />
+            </div>
+          </div>
+        )}
+
+        {/* Regular Analysis Results */}
+        {!showScenarios && results && (
+          <div className="space-y-6">
+            {/* Summary Cards */}
+            <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{results.company_name}</h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">Ticker</p>
+                  <p className="font-semibold text-lg text-gray-900 dark:text-white">{results.ticker}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">Current Price</p>
+                  <p className="font-semibold text-lg text-gray-900 dark:text-white">${results.current_price?.toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">Fair Value</p>
+                  <p className="font-semibold text-lg text-blue-500">
+                    ${results.dcf_results?.value_per_share?.toFixed(2)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600 dark:text-gray-400 text-sm">Upside</p>
+                  <p className={`font-semibold text-lg ${results.upside > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {results.upside > 0 ? '+' : ''}{results.upside}%
+                  </p>
+                </div>
+              </div>
+              
+              {/* Investment Thesis */}
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-2">Investment Thesis</h4>
+                <p className="text-sm text-gray-700 dark:text-gray-300">
+                  Based on our DCF analysis, <span className="font-semibold">{results.company_name}</span> is trading at <span className="font-semibold">${results.current_price?.toFixed(2)}</span>, 
+                  which is <span className="font-bold">{results.upside > 0 ? 'below' : 'above'}</span> our fair value estimate of <span className="font-semibold">${results.dcf_results?.value_per_share?.toFixed(2)}</span>, suggesting <span className="font-bold">{Math.abs(results.upside).toFixed(1)}% 
+                  {results.upside > 0 ? ' upside' : ' downside'}</span> potential.
+                </p>
+              </div>
+            </div>
+
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Revenue & EBITDA Growth */}
+              <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                  <TrendingUp className="h-5 w-5 text-blue-500" />
+                  Revenue & EBITDA Projection
+                </h3>
+                <RevenueGrowthChart data={results.dcf_results?.projections || []} />
+              </div>
+
+              {/* FCF Waterfall */}
+              <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                  <BarChart3 className="h-5 w-5 text-green-500" />
+                  Free Cash Flow (10 Years)
+                </h3>
+                <FCFWaterfallChart data={results.dcf_results?.projections || []} />
+              </div>
+            </div>
+
+            {/* Valuation Breakdown */}
+            <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-gray-900 dark:text-white">
+                <DollarSign className="h-5 w-5 text-purple-500" />
+                Enterprise Value Breakdown
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left side - Chart */}
+                <div>
+                  <ValuationBreakdownChart 
+                    pvFCF={results.dcf_results?.pv_fcf || 0} 
+                    pvTerminal={results.dcf_results?.pv_terminal || 0} 
+                  />
+                </div>
+
+                {/* Right side - Explanation */}
+                <div className="flex flex-col justify-center space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
                     <div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Fair Value</p>
-                      <p className="text-2xl font-bold">${scenarios.scenarios.bull.value_per_share.toFixed(2)}</p>
-                      <p className={`text-xl font-semibold mt-2 ${scenarios.scenarios.bull.upside > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {scenarios.scenarios.bull.upside > 0 ? '+' : ''}{scenarios.scenarios.bull.upside.toFixed(1)}%
+                      <p className="font-semibold text-gray-900 dark:text-white">Present Value of FCF</p>
+                      <p className="text-2xl font-bold text-blue-600">${((results.dcf_results?.pv_fcf || 0) / 1e9).toFixed(2)}B</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Value from cash flows over next 10 years
                       </p>
                     </div>
                   </div>
-                </div>
 
-                {/* Scenario Chart */}
-                <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-                  <h3 className="text-lg font-bold mb-4">Scenario Comparison</h3>
-                  <ScenarioComparisonChart data={scenarios.scenarios} currentPrice={scenarios.current_price} />
-                </div>
-              </>
-            ) : results && (
-              <>
-                {/* Regular DCF Summary */}
-                <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="w-4 h-4 bg-purple-500 rounded"></div>
                     <div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Ticker</p>
-                      <p className="font-semibold text-lg">{results.ticker}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Current Price</p>
-                      <p className="font-semibold text-lg">${results.current_price.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Fair Value</p>
-                      <p className="font-semibold text-lg text-blue-500">${results.dcf_results.value_per_share.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-gray-600 dark:text-gray-400 text-sm">Upside</p>
-                      <p className={`font-semibold text-lg ${results.upside > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                        {results.upside > 0 ? '+' : ''}{results.upside.toFixed(2)}%
+                      <p className="font-semibold text-gray-900 dark:text-white">Terminal Value</p>
+                      <p className="text-2xl font-bold text-purple-600">${((results.dcf_results?.pv_terminal || 0) / 1e9).toFixed(2)}B</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Value beyond year 10 (perpetuity)
                       </p>
                     </div>
                   </div>
-                </div>
 
-                {/* Charts */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5 text-blue-500" />
-                      Revenue & EBITDA
-                    </h3>
-                    <RevenueGrowthChart data={results.dcf_results.projections} />
+                  <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-lg border-l-4 border-green-500">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Enterprise Value</p>
+                    <p className="font-semibold text-lg text-gray-900 dark:text-white">
+                      ${((results.dcf_results?.enterprise_value || 0) / 1e9).toFixed(2)}B
+                    </p>
                   </div>
 
-                  <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5 text-green-500" />
-                      Free Cash Flow
-                    </h3>
-                    <FCFWaterfallChart data={results.dcf_results.projections} />
+                  <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-lg border-l-4 border-blue-500">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Equity Value</p>
+                    <p className="font-semibold text-lg text-gray-900 dark:text-white">
+                      ${((results.dcf_results?.equity_value || 0) / 1e9).toFixed(2)}B
+                    </p>
+                  </div>
+
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg border-l-4 border-purple-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Value Per Share</p>
+                    <p className="font-semibold text-xl text-blue-600">
+                      ${results.dcf_results?.value_per_share?.toFixed(2)}
+                    </p>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-                {/* Valuation Breakdown */}
-                <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-                  <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-purple-500" />
-                    Enterprise Value Breakdown
-                  </h3>
-                  <ValuationBreakdownChart pvFCF={results.dcf_results.pv_fcf} pvTerminal={results.dcf_results.pv_terminal} />
-                </div>
-
-                {/* Projections Table */}
-                <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-500" />
-                    10-Year Financial Projections
-                  </h3>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b-2 border-gray-300 dark:border-gray-700">
-                          <th className="text-left py-3 px-2 font-semibold">Year</th>
-                          <th className="text-right py-3 px-2 font-semibold">Revenue</th>
-                          <th className="text-right py-3 px-2 font-semibold">EBITDA</th>
-                          <th className="text-right py-3 px-2 font-semibold">EBIT</th>
-                          <th className="text-right py-3 px-2 font-semibold">NOPAT</th>
-                          <th className="text-right py-3 px-2 font-semibold">FCF</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {results.dcf_results.projections.map((proj: any) => (
-                          <tr key={proj.Year} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900">
-                            <td className="py-3 px-2 font-medium">{proj.Year}</td>
-                            <td className="text-right py-3 px-2">${(proj.Revenue / 1e9).toFixed(2)}B</td>
-                            <td className="text-right py-3 px-2">${(proj.EBITDA / 1e9).toFixed(2)}B</td>
-                            <td className="text-right py-3 px-2">${(proj.EBIT / 1e9).toFixed(2)}B</td>
-                            <td className="text-right py-3 px-2">${(proj.NOPAT / 1e9).toFixed(2)}B</td>
-                            <td className="text-right py-3 px-2 text-green-600 dark:text-green-400 font-semibold">${(proj.FCF / 1e9).toFixed(2)}B</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </>
-            )}
+        {/* Financial Projections Table */}
+        {displayData && (
+          <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+              <Calendar className="h-5 w-5 text-blue-500" />
+              10-Year Financial Projections
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b-2 border-gray-300 dark:border-gray-700">
+                    <th className="text-left py-3 px-2 text-gray-900 dark:text-white font-semibold">Year</th>
+                    <th className="text-right py-3 px-2 text-gray-900 dark:text-white font-semibold">Revenue</th>
+                    <th className="text-right py-3 px-2 text-gray-900 dark:text-white font-semibold">EBITDA</th>
+                    <th className="text-right py-3 px-2 text-gray-900 dark:text-white font-semibold">EBIT</th>
+                    <th className="text-right py-3 px-2 text-gray-900 dark:text-white font-semibold">NOPAT</th>
+                    <th className="text-right py-3 px-2 text-gray-900 dark:text-white font-semibold">FCF</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(showScenarios ? scenarios.base_case?.projections : results.dcf_results?.projections || []).map((proj: any) => (
+                    <tr key={proj.Year} className="border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900">
+                      <td className="py-3 px-2 text-gray-900 dark:text-white font-medium">{proj.Year}</td>
+                      <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.Revenue / 1e9).toFixed(2)}B</td>
+                      <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.EBITDA / 1e9).toFixed(2)}B</td>
+                      <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.EBIT / 1e9).toFixed(2)}B</td>
+                      <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.NOPAT / 1e9).toFixed(2)}B</td>
+                      <td className="text-right py-3 px-2 text-green-600 dark:text-green-400 font-semibold">${(proj.FCF / 1e9).toFixed(2)}B</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
