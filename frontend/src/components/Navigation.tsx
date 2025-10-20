@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Home, BarChart3, TrendingUp, FileText, Briefcase } from "lucide-react";
+import { Sun, Moon, Home, BarChart3, TrendingUp, FileText, Briefcase, BookmarkCheck } from "lucide-react";
 import { TextLogo } from "./Logo";
 import { useEffect, useState } from "react";
 
@@ -19,6 +19,7 @@ export function Navigation() {
     { href: "/dashboard", label: "Dashboard", icon: TrendingUp },
     { href: "/analysis", label: "Analysis", icon: FileText },
     { href: "/lbo", label: "LBO", icon: Briefcase },
+    { href: "/saved", label: "Saved", icon: BookmarkCheck },
   ];
 
   const currentTheme = theme === 'system' ? systemTheme : theme;
