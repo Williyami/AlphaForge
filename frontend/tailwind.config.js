@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: "class", // required for next-themes
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -11,12 +11,12 @@ module.exports = {
       colors: {
         primary: "#1A237E",
         "background-light": "#F5F5F5",
-        "background-dark": "#0D1117", // darker tone matches AlphaForge aesthetic
+        "background-dark": "#0D1117",
         positive: "#4CAF50",
         negative: "#F44336",
         "text-light": "#333333",
         "text-dark": "#F5F5F5",
-        "card-dark": "#161B22", // dashboard card background
+        "card-dark": "#161B22",
         "card-light": "#FFFFFF",
       },
       fontFamily: {

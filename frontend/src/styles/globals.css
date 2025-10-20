@@ -8,14 +8,66 @@
   --background-end-rgb: 255, 255, 255;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+/* Light mode styles */
+.light {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 255, 255, 255;
+  --background-end-rgb: 245, 245, 245;
+}
+
+/* Dark mode styles */
+.dark {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 13, 17, 23;
+  --background-end-rgb: 13, 17, 23;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
+  background: rgb(var(--background-start-rgb));
 }
+
+/* Light mode overrides - but DON'T override explicit text colors */
+.light body {
+  background: #F5F5F5;
+  color: #333333;
+}
+
+.light .bg-\[\#0D1117\] {
+  background-color: #F5F5F5;
+}
+
+.light .bg-\[\#161B22\] {
+  background-color: #FFFFFF;
+  border-color: #E5E7EB;
+}
+
+/* Only override gray text colors, not explicit colors */
+.light .text-gray-300:not(.text-white):not(.text-red-500):not(.text-green-500):not(.text-blue-500) {
+  color: #6B7280;
+}
+
+.light .text-gray-400:not(.text-white):not(.text-red-500):not(.text-green-500):not(.text-blue-500) {
+  color: #9CA3AF;
+}
+
+.light .border-gray-800 {
+  border-color: #E5E7EB;
+}
+
+.light .border-gray-700 {
+  border-color: #D1D5DB;
+}
+
+.light .hover\:bg-gray-800:hover {
+  background-color: #F3F4F6;
+}
+
+/* Smooth transitions */
+*:not(.no-transition) {
+  transition-property: background-color, border-color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Don't transition text color to avoid the flash */

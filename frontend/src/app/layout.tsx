@@ -22,13 +22,20 @@ export default function RootLayout({
         <title>AlphaForge - AI-Powered Equity Research</title>
         <meta name="description" content="Automated financial modeling and equity research platform" />
       </head>
-      <body className="bg-[#0D1117] text-white min-h-screen">
-        <ThemeProvider attribute="class" defaultTheme="dark">
-          {mounted && (
+      <body className="min-h-screen transition-colors duration-200">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem={true}
+          disableTransitionOnChange={false}
+        >
+          {mounted ? (
             <>
               <Navigation />
               <main className="min-h-[calc(100vh-4rem)]">{children}</main>
             </>
+          ) : (
+            <div className="min-h-screen bg-[#0D1117]" />
           )}
         </ThemeProvider>
       </body>

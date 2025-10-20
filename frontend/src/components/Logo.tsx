@@ -36,8 +36,12 @@ export function TextLogo({ className = "" }: { className?: string }) {
         priority
       />
       <div className="flex flex-col">
-        <span className="text-xl font-bold tracking-tight leading-none">AlphaForge</span>
-        <span className="text-xs text-gray-400 leading-none">Equity Research</span>
+        <span className="text-xl font-bold tracking-tight leading-none text-gray-900 dark:text-white">
+          AlphaForge
+        </span>
+        <span className="text-xs text-gray-600 dark:text-gray-400 leading-none">
+          Equity Research
+        </span>
       </div>
     </div>
   );

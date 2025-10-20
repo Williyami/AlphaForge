@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useTheme } from "next-themes";
-import { Sun, Moon } from "lucide-react";
+import { Sun, Moon, ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { DCFIcon, LBOIcon, CompsIcon, TeslaIcon, NetflixIcon, PEIcon } from "@/components/Icons";
 
 export default function Home() {
   const { theme, setTheme } = useTheme();
@@ -13,133 +15,149 @@ export default function Home() {
   if (!mounted) return null;
 
   return (
-    <div className="min-h-screen bg-[#0D1117] text-white transition-colors duration-300 dark:bg-[#0D1117]">
-      {/* Header */}
-      <header className="flex items-center justify-between px-8 py-6 border-b border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-            A
-          </div>
-          <h1 className="text-xl font-bold tracking-tight">AlphaForge</h1>
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0D1117] text-gray-900 dark:text-white transition-colors duration-300">
+      {/* Hero Section */}
+      <section className="max-w-5xl mx-auto px-6 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Welcome back, William!
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-lg mb-8">
+            Generate professional valuations and financial models in seconds
+          </p>
         </div>
 
-        <div className="flex items-center gap-6">
-          <button
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="p-2 rounded-lg hover:bg-gray-800 transition"
-          >
-            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-          </button>
-          <div className="h-10 w-10 rounded-full bg-gray-600 flex items-center justify-center text-sm font-semibold">
-            O
-          </div>
-        </div>
-      </header>
-
-      {/* Welcome Section */}
-      <main className="max-w-5xl mx-auto px-6 py-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6 text-center">
-          Welcome back, Olivia!
-        </h2>
-
-        <div className="flex justify-center mb-12">
-          <div className="flex w-full md:w-[600px]">
+        {/* Search Bar */}
+        <div className="flex justify-center mb-16">
+          <div className="flex w-full md:w-[600px] bg-white dark:bg-[#161B22] rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden shadow-lg">
             <input
               type="text"
               placeholder="e.g., 'Generate a DCF model for Apple Inc.'"
-              className="flex-grow px-4 py-3 rounded-l-lg bg-[#161B22] text-gray-200 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+              className="flex-grow px-6 py-4 bg-transparent text-gray-900 dark:text-gray-200 focus:outline-none placeholder-gray-400 dark:placeholder-gray-500"
             />
-            <button className="px-6 py-3 rounded-r-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">
+            <button className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold transition flex items-center gap-2">
               Generate
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
 
         {/* Start New Analysis */}
-        <section className="mb-12">
-          <h3 className="text-xl font-semibold mb-4 text-gray-300">
+        <section className="mb-16">
+          <h3 className="text-2xl font-semibold mb-6 text-gray-800 dark:text-gray-300">
             Start a New Analysis
           </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button className="bg-[#161B22] hover:bg-[#1E2631] rounded-xl p-6 text-center transition">
-              <div className="text-3xl mb-2">📈</div>
-              <p className="font-semibold">New DCF</p>
-              <p className="text-gray-400 text-sm">Discounted Cash Flow</p>
-            </button>
-            <button className="bg-[#161B22] hover:bg-[#1E2631] rounded-xl p-6 text-center transition">
-              <div className="text-3xl mb-2">🏦</div>
-              <p className="font-semibold">New LBO</p>
-              <p className="text-gray-400 text-sm">Leveraged Buyout</p>
-            </button>
-            <button className="bg-[#161B22] hover:bg-[#1E2631] rounded-xl p-6 text-center transition">
-              <div className="text-3xl mb-2">💼</div>
-              <p className="font-semibold">New Comps</p>
-              <p className="text-gray-400 text-sm">Comparable Company Analysis</p>
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Link
+              href="/analysis"
+              className="group bg-white dark:bg-[#161B22] hover:bg-gray-50 dark:hover:bg-[#1E2631] rounded-xl p-8 text-center transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20"
+            >
+              <div className="flex justify-center mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                <DCFIcon className="w-16 h-16" />
+              </div>
+              <p className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">New DCF</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Discounted Cash Flow</p>
+            </Link>
+
+            <Link
+              href="/analysis"
+              className="group bg-white dark:bg-[#161B22] hover:bg-gray-50 dark:hover:bg-[#1E2631] rounded-xl p-8 text-center transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-green-500 hover:shadow-lg hover:shadow-green-500/20"
+            >
+              <div className="flex justify-center mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                <LBOIcon className="w-16 h-16" />
+              </div>
+              <p className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">New LBO</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Leveraged Buyout</p>
+            </Link>
+
+            <Link
+              href="/analysis"
+              className="group bg-white dark:bg-[#161B22] hover:bg-gray-50 dark:hover:bg-[#1E2631] rounded-xl p-8 text-center transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-purple-500 hover:shadow-lg hover:shadow-purple-500/20"
+            >
+              <div className="flex justify-center mb-4 transform group-hover:scale-110 transition-transform duration-300">
+                <CompsIcon className="w-16 h-16" />
+              </div>
+              <p className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">New Comps</p>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">Comparable Company Analysis</p>
+            </Link>
           </div>
         </section>
 
         {/* Recent Analyses */}
         <section>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-semibold text-gray-300">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-300">
               Your Recent Analyses
             </h3>
-            <button className="text-blue-500 hover:underline text-sm">
+            <button className="text-blue-600 dark:text-blue-500 hover:text-blue-700 dark:hover:text-blue-400 text-sm font-medium flex items-center gap-1 transition">
               View All
+              <ArrowRight className="h-4 w-4" />
             </button>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {/* Tesla */}
-            <div className="bg-[#161B22] rounded-xl overflow-hidden hover:shadow-lg transition cursor-pointer">
-              <Image
-                src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
-                alt="Tesla DCF"
-                width={400}
-                height={250}
-                className="object-cover h-40 w-full"
-              />
-              <div className="p-4">
-                <h4 className="font-semibold mb-1">Tesla Inc. DCF Model</h4>
-                <p className="text-gray-400 text-sm">October 26, 2023</p>
+            {/* Tesla Card */}
+            <Link
+              href="/analysis"
+              className="group bg-white dark:bg-[#161B22] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
+            >
+              <div className="relative h-40 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 overflow-hidden">
+                <TeslaIcon />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#161B22] to-transparent opacity-60" />
+                <div className="absolute top-3 right-3 bg-blue-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+                  DCF
+                </div>
               </div>
-            </div>
+              <div className="p-5">
+                <h4 className="font-semibold text-lg mb-1 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
+                  Tesla Inc. DCF Model
+                </h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">October 26, 2024</p>
+              </div>
+            </Link>
 
-            {/* Netflix */}
-            <div className="bg-[#161B22] rounded-xl overflow-hidden hover:shadow-lg transition cursor-pointer">
-              <Image
-                src="https://images.unsplash.com/photo-1517816428104-797678c7cf0c"
-                alt="Netflix Comps"
-                width={400}
-                height={250}
-                className="object-cover h-40 w-full"
-              />
-              <div className="p-4">
-                <h4 className="font-semibold mb-1">
+            {/* Netflix Card */}
+            <Link
+              href="/analysis"
+              className="group bg-white dark:bg-[#161B22] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
+            >
+              <div className="relative h-40 bg-gradient-to-br from-purple-100 to-purple-200 dark:from-purple-900 dark:to-purple-950 overflow-hidden">
+                <NetflixIcon />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#161B22] to-transparent opacity-60" />
+                <div className="absolute top-3 right-3 bg-purple-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+                  Comps
+                </div>
+              </div>
+              <div className="p-5">
+                <h4 className="font-semibold text-lg mb-1 text-gray-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition">
                   Netflix Inc. Comps Analysis
                 </h4>
-                <p className="text-gray-400 text-sm">October 25, 2023</p>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">October 25, 2024</p>
               </div>
-            </div>
+            </Link>
 
-            {/* Private Equity */}
-            <div className="bg-[#161B22] rounded-xl overflow-hidden hover:shadow-lg transition cursor-pointer">
-              <Image
-                src="https://images.unsplash.com/photo-1554224155-6726b3ff858f"
-                alt="Private Equity LBO"
-                width={400}
-                height={250}
-                className="object-cover h-40 w-full"
-              />
-              <div className="p-4">
-                <h4 className="font-semibold mb-1">Private Equity LBO Model</h4>
-                <p className="text-gray-400 text-sm">October 24, 2023</p>
+            {/* Private Equity Card */}
+            <Link
+              href="/analysis"
+              className="group bg-white dark:bg-[#161B22] rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700"
+            >
+              <div className="relative h-40 bg-gradient-to-br from-cyan-100 to-blue-200 dark:from-cyan-900 dark:to-blue-950 overflow-hidden">
+                <PEIcon />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#161B22] to-transparent opacity-60" />
+                <div className="absolute top-3 right-3 bg-green-600 text-white text-xs px-3 py-1 rounded-full font-medium">
+                  LBO
+                </div>
               </div>
-            </div>
+              <div className="p-5">
+                <h4 className="font-semibold text-lg mb-1 text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition">
+                  Private Equity LBO Model
+                </h4>
+                <p className="text-gray-600 dark:text-gray-400 text-sm">October 24, 2024</p>
+              </div>
+            </Link>
           </div>
         </section>
-      </main>
+      </section>
     </div>
   );
 }
