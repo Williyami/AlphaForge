@@ -1,26 +1,31 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.config import settings
+from app.api.v1.routes import analysis, market, lbo
 
-app = FastAPI(title="AlphaForge API", version="1.0.0")
+app = FastAPI(
+    title="AlphaForge API",
+    description="AI-Powered Equity Research Platform",
+    version="1.0.0"
+)
 
+# CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-from app.api.v1.routes import analysis, market
-
+# Include routers
 app.include_router(analysis.router, prefix="/api/v1/analysis", tags=["analysis"])
 app.include_router(market.router, prefix="/api/v1/market", tags=["market"])
+app.include_router(lbo.router, prefix="/api/v1/lbo", tags=["lbo"])
 
 @app.get("/")
-def root():
-    return {"message": "AlphaForge API", "status": "running"}
+async def root():
+    return {"message": "AlphaForge API - Equity Research Platform"}
 
 @app.get("/health")
-def health():
+async def health():
     return {"status": "healthy"}
