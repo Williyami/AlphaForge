@@ -1,17 +1,15 @@
 import Image from "next/image";
 
 interface LogoProps {
-  variant?: "default" | "white" | "icon";
+  variant?: "default" | "icon";
   size?: number;
   className?: string;
 }
 
-export function Logo({ variant = "default", size = 32, className = "" }: LogoProps) {
-  const logoSrc = variant === "white" 
-    ? "/logos/alphaforge-logo-white.svg" 
-    : variant === "icon"
-    ? "/logos/alphaforge-icon.svg"
-    : "/logos/alphaforge-logo.svg";
+export function Logo({ variant = "default", size = 40, className = "" }: LogoProps) {
+  const logoSrc = variant === "icon"
+    ? "/logos/alphaforge-icon.png"
+    : "/logos/alphaforge-logo.png";
 
   return (
     <Image
@@ -27,11 +25,20 @@ export function Logo({ variant = "default", size = 32, className = "" }: LogoPro
 
 export function TextLogo({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold">
-        A
+    <div className={`flex items-center gap-3 ${className}`}>
+      {/* Use your actual logo */}
+      <Image
+        src="/logos/alphaforge-icon.png"
+        alt="AlphaForge"
+        width={40}
+        height={40}
+        className="rounded-lg"
+        priority
+      />
+      <div className="flex flex-col">
+        <span className="text-xl font-bold tracking-tight leading-none">AlphaForge</span>
+        <span className="text-xs text-gray-400 leading-none">Equity Research</span>
       </div>
-      <span className="text-xl font-bold tracking-tight">AlphaForge</span>
     </div>
   );
 }

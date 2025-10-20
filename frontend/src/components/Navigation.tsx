@@ -3,27 +3,80 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, BarChart3, TrendingUp, FileText } from "lucide-react";
+import { Sun, Moon, Home, BarChart3, TrendingUp, FileText, Settings } from "lucide-react";
 import { TextLogo } from "./Logo";
+import { useEffect, useState } from "react";
 
 export function Navigation() {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const navItems = [
-    { href: "/", label: "Home", icon: BarChart3 },
+    { href: "/", label: "Home", icon: Home },
     { href: "/dashboard", label: "Dashboard", icon: TrendingUp },
     { href: "/analysis", label: "Analysis", icon: FileText },
   ];
 
-  return (
-    <header className="sticky top-0 z-50 border-b border-gray-800 bg-[#0D1117]/95 backdrop-blur-sm">
-      <div className="flex items-center justify-between px-6 py-4">
-        <Link href="/" className="flex items-center">
-          <TextLogo />
-        </Link>
+  if (!mounted) return null;
 
-        <nav className="hidden md:flex items-center gap-6">
+  return (
+    <header className="sticky top-0 z-50 border-b border-gray-800/50 bg-[#0D1117]/80 backdrop-blur-md shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
+            <TextLogo />
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-1">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                    isActive
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-600/50"
+                      : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right Side Actions */}
+          <div className="flex items-center gap-3">
+            {/* Theme Toggle */}
+            <button
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+              className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? (
+                <Moon size={20} className="text-gray-300" />
+              ) : (
+                <Sun size={20} className="text-gray-300" />
+              )}
+            </button>
+
+            {/* User Avatar */}
+            <button className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-sm font-bold hover:shadow-lg hover:shadow-blue-600/50 transition-all">
+              O
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        <nav className="md:hidden flex items-center gap-1 pb-3 overflow-x-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -31,31 +84,18 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-all ${
                   isActive
                     ? "bg-blue-600 text-white"
-                    : "text-gray-300 hover:bg-gray-800 hover:text-white"
+                    : "text-gray-300 hover:bg-gray-800"
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                {item.label}
+                <span className="text-sm">{item.label}</span>
               </Link>
             );
           })}
         </nav>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-            className="p-2 rounded-lg hover:bg-gray-800 transition"
-            aria-label="Toggle theme"
-          >
-            {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
-          </button>
-          <button className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-semibold hover:bg-blue-700 transition">
-            O
-          </button>
-        </div>
       </div>
     </header>
   );

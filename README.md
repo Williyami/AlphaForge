@@ -100,3 +100,7 @@ uvicorn app.main:app --reload
 cd /Users/williameklund/AFproject/equity-research-platform/frontend
 npm install
 npm run dev
+
+
+
+CHANGE BACK FROM MOCK DATA
