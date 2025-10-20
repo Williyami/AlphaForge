@@ -19,6 +19,7 @@ export function Navigation() {
     { href: "/dashboard", label: "Dashboard", icon: TrendingUp },
     { href: "/analysis", label: "Analysis", icon: FileText },
     { href: "/lbo", label: "LBO", icon: Briefcase },
+    { href: "/saved", label: "Saved", icon: BarChart3 },
     { href: "/pricing", label: "Pricing", icon: DollarSign },
   ];
 
