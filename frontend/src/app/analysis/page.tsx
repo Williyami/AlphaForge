@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { Search, DollarSign, Calendar, Zap, TrendingUp, BarChart3, PieChart } from 'lucide-react';
+import { Search, DollarSign, Calendar, Zap, TrendingUp, BarChart3, Download } from 'lucide-react';
 import { BearIcon, BaseIcon, BullIcon } from '@/components/Icons';
 import { RevenueGrowthChart, FCFWaterfallChart, ScenarioComparisonChart, ValuationBreakdownChart } from '@/components/Charts';
+import { exportDCFToExcel, exportScenariosToExcel } from '@/lib/exportToExcel';
 
 export default function Analysis() {
   const [ticker, setTicker] = useState('');
@@ -59,14 +60,34 @@ export default function Analysis() {
     }
   };
 
+  const handleExport = () => {
+    if (showScenarios && scenarios) {
+      exportScenariosToExcel(scenarios);
+    } else if (results) {
+      exportDCFToExcel(results);
+    }
+  };
+
   const displayData = showScenarios ? scenarios : results;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0D1117] text-gray-900 dark:text-white p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Stock Analysis</h1>
-          <p className="text-gray-600 dark:text-gray-400">Generate DCF valuations and scenario analysis</p>
+        {/* Header with Export Button */}
+        <header className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Stock Analysis</h1>
+            <p className="text-gray-600 dark:text-gray-400">Generate DCF valuations and scenario analysis</p>
+          </div>
+          {displayData && (
+            <button
+              onClick={handleExport}
+              className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center gap-2 transition shadow-lg hover:shadow-xl"
+            >
+              <Download className="h-5 w-5" />
+              Export to Excel
+            </button>
+          )}
         </header>
 
         {/* Search Bar */}
@@ -255,13 +276,44 @@ export default function Analysis() {
               </div>
             </div>
 
+            {/* Investment Recommendation - MOVED HERE */}
+            <div className={`rounded-lg p-6 border-2 ${
+              results.upside > 20 
+                ? 'bg-green-50 dark:bg-green-900/20 border-green-400 dark:border-green-600' 
+                : results.upside > 0 
+                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 dark:border-blue-600'
+                : 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600'
+            }`}>
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-lg ${
+                  results.upside > 20 
+                    ? 'bg-green-500' 
+                    : results.upside > 0 
+                    ? 'bg-blue-500'
+                    : 'bg-red-500'
+                }`}>
+                  <TrendingUp className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+                    {results.upside > 20 ? 'Strong Buy 🚀' : results.upside > 0 ? 'Buy 👍' : 'Hold/Sell ⚠️'}
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 text-lg">
+                    {results.ticker} is trading at <span className="font-semibold">${results.current_price.toFixed(2)}</span>, 
+                    {results.upside > 0 ? ' below' : ' above'} our fair value estimate of <span className="font-semibold">${results.dcf_results.value_per_share.toFixed(2)}</span>, suggesting <span className="font-bold">{Math.abs(results.upside).toFixed(1)}% 
+                    {results.upside > 0 ? ' upside' : ' downside'}</span> potential.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Revenue & EBITDA Growth */}
               <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                   <TrendingUp className="h-5 w-5 text-blue-500" />
-                  Revenue & EBITDA Growth
+                  Revenue & EBITDA Projection
                 </h3>
                 <RevenueGrowthChart data={results.dcf_results.projections} />
               </div>
@@ -270,29 +322,67 @@ export default function Analysis() {
               <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                   <BarChart3 className="h-5 w-5 text-green-500" />
-                  Free Cash Flow
+                  Free Cash Flow (5 Years)
                 </h3>
                 <FCFWaterfallChart data={results.dcf_results.projections} />
               </div>
             </div>
 
-            {/* Valuation Breakdown */}
+            {/* Valuation Breakdown - IMPROVED */}
             <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
-                <PieChart className="h-5 w-5 text-purple-500" />
-                Valuation Breakdown
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2 text-gray-900 dark:text-white">
+                <DollarSign className="h-5 w-5 text-purple-500" />
+                Enterprise Value Breakdown
               </h3>
-              <ValuationBreakdownChart 
-                pvFCF={results.dcf_results.pv_fcf} 
-                pvTerminal={results.dcf_results.pv_terminal} 
-              />
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Left side - Chart */}
+                <div>
+                  <ValuationBreakdownChart 
+                    pvFCF={results.dcf_results.pv_fcf} 
+                    pvTerminal={results.dcf_results.pv_terminal} 
+                  />
+                </div>
+
+                {/* Right side - Explanation */}
+                <div className="flex flex-col justify-center space-y-4">
+                  <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">Present Value of FCF</p>
+                      <p className="text-2xl font-bold text-blue-600">${(results.dcf_results.pv_fcf / 1e9).toFixed(2)}B</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Value from cash flows over next 10 years
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                    <div className="w-4 h-4 bg-purple-500 rounded"></div>
+                    <div>
+                      <p className="font-semibold text-gray-900 dark:text-white">Terminal Value</p>
+                      <p className="text-2xl font-bold text-purple-600">${(results.dcf_results.pv_terminal / 1e9).toFixed(2)}B</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Value beyond year 10 (perpetuity)
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-100 dark:bg-gray-900 rounded-lg border-2 border-gray-300 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Enterprise Value</p>
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                      ${(results.dcf_results.enterprise_value / 1e9).toFixed(2)}B
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* DCF Summary */}
             <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
                 <DollarSign className="h-5 w-5 text-blue-500" />
-                DCF Valuation Summary
+                Full Valuation Summary
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="bg-gray-50 dark:bg-[#0D1117] p-4 rounded-lg">
@@ -308,9 +398,9 @@ export default function Analysis() {
                   </p>
                 </div>
                 <div className="bg-gray-50 dark:bg-[#0D1117] p-4 rounded-lg">
-                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">PV of FCF</p>
-                  <p className="font-semibold text-xl text-gray-900 dark:text-white">
-                    ${(results.dcf_results.pv_fcf / 1e9).toFixed(2)}B
+                  <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">Value Per Share</p>
+                  <p className="font-semibold text-xl text-blue-600">
+                    ${results.dcf_results.value_per_share.toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -345,34 +435,12 @@ export default function Analysis() {
                       <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.EBITDA / 1e9).toFixed(2)}B</td>
                       <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.EBIT / 1e9).toFixed(2)}B</td>
                       <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.NOPAT / 1e9).toFixed(2)}B</td>
-                      <td className="text-right py-3 px-2 text-green-600 dark:text-green-
-                      400 font-semibold">${(proj.FCF / 1e9).toFixed(2)}B</td>
+                      <td className="text-right py-3 px-2 text-green-600 dark:text-green-400 font-semibold">${(proj.FCF / 1e9).toFixed(2)}B</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          </div>
-        )}
-
-        {/* Investment Recommendation */}
-        {!showScenarios && results && (
-          <div className={`rounded-lg p-6 border ${
-            results.upside > 20 
-              ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700' 
-              : results.upside > 0 
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
-              : 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-700'
-          }`}>
-            <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">
-              {results.upside > 20 ? 'Strong Buy' : results.upside > 0 ? 'Buy' : 'Hold/Sell'}
-            </h3>
-            <p className="text-gray-700 dark:text-gray-300">
-              Based on DCF analysis, {results.ticker} is trading at ${results.current_price.toFixed(2)}, 
-              {results.upside > 0 ? ' below' : ' above'} our fair value estimate of $
-              {results.dcf_results.value_per_share.toFixed(2)}, suggesting {Math.abs(results.upside).toFixed(1)}% 
-              {results.upside > 0 ? ' upside' : ' downside'} potential.
-            </p>
           </div>
         )}
       </div>
