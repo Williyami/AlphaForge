@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Home, BarChart3, TrendingUp, FileText } from "lucide-react";
+import { Sun, Moon, Home, BarChart3, TrendingUp, FileText, Briefcase } from "lucide-react";
 import { TextLogo } from "./Logo";
 import { useEffect, useState } from "react";
 
@@ -18,6 +18,7 @@ export function Navigation() {
     { href: "/", label: "Home", icon: Home },
     { href: "/dashboard", label: "Dashboard", icon: TrendingUp },
     { href: "/analysis", label: "Analysis", icon: FileText },
+    { href: "/lbo", label: "LBO", icon: Briefcase },
   ];
 
   const currentTheme = theme === 'system' ? systemTheme : theme;
@@ -44,12 +45,10 @@ export function Navigation() {
     <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800/50 bg-white/80 dark:bg-[#0D1117]/80 backdrop-blur-md shadow-sm dark:shadow-lg">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Logo */}
           <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
             <TextLogo />
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -71,9 +70,7 @@ export function Navigation() {
             })}
           </nav>
 
-          {/* Right Side Actions */}
           <div className="flex items-center gap-3">
-            {/* Theme Toggle */}
             <button
               onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
               className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors group"
@@ -89,14 +86,12 @@ export function Navigation() {
               </div>
             </button>
 
-            {/* User Avatar */}
             <button className="h-9 w-9 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-sm font-bold hover:shadow-lg hover:shadow-blue-600/50 transition-all text-white">
               W
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         <nav className="md:hidden flex items-center gap-1 pb-3 overflow-x-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
