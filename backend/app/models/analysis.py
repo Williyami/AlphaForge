@@ -1,77 +1,59 @@
-from sqlalchemy import Column, Integer, String, Float, JSON, DateTime, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from datetime import datetime
+from sqlalchemy import Column, Integer, String, Float, DateTime, JSON, ForeignKey
+from sqlalchemy.sql import func
+from app.database import Base
 
-Base = declarative_base()
-
-class User(Base):
-    """User accounts - who owns the analyses"""
-    __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    username = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    
-    # Relationships
-    dcf_analyses = relationship("DCFAnalysis", back_populates="user")
-    lbo_analyses = relationship("LBOAnalysis", back_populates="user")
+# Import User from user.py instead of defining it here
+from app.models.user import User
 
 class DCFAnalysis(Base):
-    """Saved DCF valuations"""
     __tablename__ = "dcf_analyses"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    ticker = Column(String, index=True)
-    company_name = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
-    # Valuation Results
+    # Company Info
+    ticker = Column(String, nullable=False, index=True)
+    company_name = Column(String, nullable=False)
+    
+    # Key Results
     current_price = Column(Float)
-    fair_value = Column(Float)
-    upside_percent = Column(Float)
+    fair_value = Column(Float, nullable=False)
+    upside_percent = Column(Float, nullable=False)
     enterprise_value = Column(Float)
     equity_value = Column(Float)
     
-    # Full Results (JSON)
-    dcf_results = Column(JSON)
+    # Full DCF Results (JSON)
+    dcf_results = Column(JSON, nullable=False)
     
-    # Metadata
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    user = relationship("User", back_populates="dcf_analyses")
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
 class LBOAnalysis(Base):
-    """Saved LBO analyses"""
     __tablename__ = "lbo_analyses"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    ticker = Column(String, index=True)
-    company_name = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     
-    # LBO Parameters
-    purchase_multiple = Column(Float)
-    exit_multiple = Column(Float)
-    debt_percent = Column(Float)
-    hold_period = Column(Integer)
+    # Company Info
+    ticker = Column(String, nullable=False, index=True)
+    company_name = Column(String, nullable=False)
     
-    # Returns
-    irr = Column(Float)
-    moic = Column(Float)
+    # LBO Inputs
+    purchase_multiple = Column(Float, nullable=False)
+    exit_multiple = Column(Float, nullable=False)
+    debt_percent = Column(Float, nullable=False)
+    hold_period = Column(Integer, nullable=False)
+    
+    # Key Results
+    irr = Column(Float, nullable=False)
+    moic = Column(Float, nullable=False)
     entry_equity = Column(Float)
     exit_equity = Column(Float)
     
-    # Full Results (JSON)
-    lbo_results = Column(JSON)
+    # Full LBO Results (JSON)
+    lbo_results = Column(JSON, nullable=False)
     
-    # Metadata
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
-    # Relationships
-    user = relationship("User", back_populates="lbo_analyses")
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())

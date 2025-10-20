@@ -1,29 +1,20 @@
 from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from app.models.analysis import Base
-import os
 
-# Database URL - how to connect to PostgreSQL
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://alphaforge:alphaforge123@localhost:5432/equity_research"
+SQLALCHEMY_DATABASE_URL = "sqlite:///./alphaforge.db"
+
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, 
+    connect_args={"check_same_thread": False}
 )
 
-# Create engine - the connection to database
-engine = create_engine(DATABASE_URL)
-
-# Create session maker - how we talk to database
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Create all tables
-def init_db():
-    """Create all tables in the database"""
-    Base.metadata.create_all(bind=engine)
-    print("✅ Database tables created!")
+# Define Base here, don't import it from models
+Base = declarative_base()
 
-# Dependency for routes
 def get_db():
-    """Get a database session"""
     db = SessionLocal()
     try:
         yield db
