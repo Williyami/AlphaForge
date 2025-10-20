@@ -100,7 +100,17 @@ uvicorn app.main:app --reload
 cd /Users/williameklund/AFproject/equity-research-platform/frontend
 npm install
 npm run dev
+npm install recharts
 
+## Next steps
 
 
 CHANGE BACK FROM MOCK DATA
+Step 2: Save Analysis Feature 
+Set up PostgreSQL and save DCF results
+
+Step 3: LBO Model 
+Build a complete LBO calculator
+
+Step 4:
+Add quick dcf/lbo which is current verison but also advanced which allows the user to input levered/unlevered, riskpremium and so on.

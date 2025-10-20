@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { Search, DollarSign, Calendar, Zap } from 'lucide-react';
+import { Search, DollarSign, Calendar, Zap, TrendingUp, BarChart3, PieChart } from 'lucide-react';
 import { BearIcon, BaseIcon, BullIcon } from '@/components/Icons';
+import { RevenueGrowthChart, FCFWaterfallChart, ScenarioComparisonChart, ValuationBreakdownChart } from '@/components/Charts';
 
 export default function Analysis() {
   const [ticker, setTicker] = useState('');
@@ -62,7 +63,7 @@ export default function Analysis() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#0D1117] text-gray-900 dark:text-white p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <header className="mb-8">
           <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Stock Analysis</h1>
           <p className="text-gray-600 dark:text-gray-400">Generate DCF valuations and scenario analysis</p>
@@ -103,6 +104,7 @@ export default function Analysis() {
         {/* Scenario Analysis Results */}
         {showScenarios && scenarios && (
           <div className="space-y-6">
+            {/* Header */}
             <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{scenarios.company_name}</h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
@@ -210,33 +212,15 @@ export default function Analysis() {
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Valuation Range */}
-              <div className="mt-8 bg-gray-50 dark:bg-gray-900 rounded-lg p-6">
-                <h3 className="text-lg font-bold mb-4 text-gray-900 dark:text-white">Valuation Range</h3>
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <div className="relative h-8 bg-gradient-to-r from-red-200 via-blue-200 to-green-200 dark:from-red-900 dark:via-blue-900 dark:to-green-900 rounded-lg overflow-hidden">
-                      <div 
-                        className="absolute top-0 bottom-0 w-1 bg-black dark:bg-white"
-                        style={{
-                          left: `${((scenarios.current_price - scenarios.scenarios.bear.value_per_share) / 
-                                  (scenarios.scenarios.bull.value_per_share - scenarios.scenarios.bear.value_per_share)) * 100}%`
-                        }}
-                      >
-                        <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs whitespace-nowrap text-gray-900 dark:text-white font-semibold">
-                          Current
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex justify-between mt-2 text-sm text-gray-600 dark:text-gray-400">
-                      <span>${scenarios.scenarios.bear.value_per_share.toFixed(0)}</span>
-                      <span>${scenarios.scenarios.base.value_per_share.toFixed(0)}</span>
-                      <span>${scenarios.scenarios.bull.value_per_share.toFixed(0)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Scenario Comparison Chart */}
+            <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                <BarChart3 className="h-5 w-5 text-blue-500" />
+                Scenario Comparison
+              </h3>
+              <ScenarioComparisonChart scenarios={scenarios.scenarios} currentPrice={scenarios.current_price} />
             </div>
           </div>
         )}
@@ -244,6 +228,7 @@ export default function Analysis() {
         {/* Regular Analysis Results */}
         {!showScenarios && results && (
           <div className="space-y-6">
+            {/* Summary Cards */}
             <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
               <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">{results.company_name}</h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -268,6 +253,39 @@ export default function Analysis() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Charts Row */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Revenue & EBITDA Growth */}
+              <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                  <TrendingUp className="h-5 w-5 text-blue-500" />
+                  Revenue & EBITDA Growth
+                </h3>
+                <RevenueGrowthChart data={results.dcf_results.projections} />
+              </div>
+
+              {/* FCF Waterfall */}
+              <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                  <BarChart3 className="h-5 w-5 text-green-500" />
+                  Free Cash Flow
+                </h3>
+                <FCFWaterfallChart data={results.dcf_results.projections} />
+              </div>
+            </div>
+
+            {/* Valuation Breakdown */}
+            <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
+                <PieChart className="h-5 w-5 text-purple-500" />
+                Valuation Breakdown
+              </h3>
+              <ValuationBreakdownChart 
+                pvFCF={results.dcf_results.pv_fcf} 
+                pvTerminal={results.dcf_results.pv_terminal} 
+              />
             </div>
 
             {/* DCF Summary */}
@@ -300,7 +318,7 @@ export default function Analysis() {
           </div>
         )}
 
-        {/* Financial Projections Table - Shows for BOTH scenarios and regular analysis */}
+        {/* Financial Projections Table */}
         {displayData && (
           <div className="bg-white dark:bg-[#161B22] rounded-lg p-6 border border-gray-200 dark:border-gray-800">
             <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-gray-900 dark:text-white">
@@ -327,7 +345,8 @@ export default function Analysis() {
                       <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.EBITDA / 1e9).toFixed(2)}B</td>
                       <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.EBIT / 1e9).toFixed(2)}B</td>
                       <td className="text-right py-3 px-2 text-gray-900 dark:text-white">${(proj.NOPAT / 1e9).toFixed(2)}B</td>
-                      <td className="text-right py-3 px-2 text-green-600 dark:text-green-400 font-semibold">${(proj.FCF / 1e9).toFixed(2)}B</td>
+                      <td className="text-right py-3 px-2 text-green-600 dark:text-green-
+                      400 font-semibold">${(proj.FCF / 1e9).toFixed(2)}B</td>
                     </tr>
                   ))}
                 </tbody>
@@ -336,7 +355,7 @@ export default function Analysis() {
           </div>
         )}
 
-        {/* Investment Recommendation - Shows for regular analysis only */}
+        {/* Investment Recommendation */}
         {!showScenarios && results && (
           <div className={`rounded-lg p-6 border ${
             results.upside > 20 
